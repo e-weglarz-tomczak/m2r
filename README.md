@@ -18,3 +18,14 @@ In the console or in a Python IDE run the following:
 or
 `python3 m2r.py`
 Then, please provide all necessary information (i.e., paths to directories, values of hyperparameters).
+
+## Citing the code
+If you find our program interesting or you use it in your work, please cite the following paper:
+```
+@article{m2r2020,
+  title={M2R: Modifying human genome-scale metabolic model with microbiota,
+  author={Weglarz-Tomczak, Ewelina and Tomczak, Jakub M. and Brul, Stanley},
+  journal={(submitted)},
+  year={2018}
+}
+```
