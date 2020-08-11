@@ -14,10 +14,14 @@ The program assumes the following:
 
 ## Running the program
 In the console or in a Python IDE run the following:
+
 `python m2r.py`
+
 or
+
 `python3 m2r.py`
-Then, please provide all necessary information (i.e., paths to directories, values of hyperparameters).
+
+Then, please provide all necessary information (i.e., paths to directories, values of hyperparameters). The output of the program is a new model with information from microbiota.
 
 ## Citing the code
 If you find our program interesting or you use it in your work, please cite the following paper:
