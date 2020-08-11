@@ -30,6 +30,6 @@ If you find our program interesting or you use it in your work, please cite the 
   title={M2R: Modifying human genome-scale metabolic models with information from microbiota,
   author={Weglarz-Tomczak, Ewelina and Tomczak, Jakub M. and Brul, Stanley},
   journal={(submitted)},
-  year={2018}
+  year={2020}
 }
 ```
