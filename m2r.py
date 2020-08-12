@@ -166,7 +166,7 @@ class Microbiota2Recon(object):
 
         ins_n, outs_n = self.normalize_ins_outs(ins, outs)
 
-        Recon = m2r.modify_recon(self.R, ins_n, outs_n, weight=self.weight)
+        Recon = self.modify_recon(self.R, ins_n, outs_n, weight=self.weight)
 
         if self.new_recon_name[-3:] == 'mat':
             cobra.io.save_matlab_model(Recon, os.path.join(self.recon_dir, self.new_recon_name))
