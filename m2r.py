@@ -110,7 +110,11 @@ class Microbiota2Recon(object):
             microb = files[i]
             print('\t(File {} out of {}) {}'.format(i+1, len(files), microb))
             # load microbiota
-            M = cobra.io.load_matlab_model(os.path.join(folder, microb))
+            if microb[-3:] == 'mat':
+                M = cobra.io.load_matlab_model(os.path.join(folder, microb))
+            else:
+                with open(os.path.join(folder, microb), 'rb') as handle:
+                    M = pickle.load(handle)
             # get summary to read fluxes and inputs and outputs
             pf = M.summary()._generate()
             # get inputs and outputs from the microbiota
@@ -148,13 +152,13 @@ class Microbiota2Recon(object):
 
         # go over inputs and modify lower bounds
         for ki in inputs:
-            if ki in self.names:
+            if 'EX_' + ki in self.names:
                 Recon.reactions.get_by_id('EX_' + ki).lower_bound = Recon.reactions.get_by_id('EX_' + ki).lower_bound + (
                         1. - weight) * inputs[ki]
 
         # go over outputs
         for ko in outputs:
-            if ko in self.names:
+            if 'EX_' + ko in self.names:
                 Recon.reactions.get_by_id('EX_' + ko).lower_bound = Recon.reactions.get_by_id('EX_' + ko).lower_bound - (
                         1. - weight) * outputs[ko]
 
