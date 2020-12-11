@@ -28,13 +28,13 @@ class Microbiota2Recon(object):
             print('\t -> {}'.format(self.files))
 
         while True:
-            self.weight = float(input('Please provide a value of the weight (between 0 and 1; default: 0.5): ') or "0.5")
-            if self.weight <= 0. or self.weight >= 1.:
-                print("Sorry, weight must be between 0. and 1. Please provide a new value.")
+            self.alpha = float(input('Please provide a value of alpha (between 0 and 1; default: 0.5): ') or "0.5")
+            if self.alpha <= 0. or self.alpha >= 1.:
+                print("Sorry, alpha must be between 0. and 1. Please provide a new value.")
                 continue
             else:
                 break
-        print('\t -> {}'.format(self.weight))
+        print('\t -> {}'.format(self.alpha))
 
         while True:
             self.fin_value = float(input('Please provide a value that fluxes should be normalized to (default: 1000.): ') or "1000")
@@ -138,9 +138,9 @@ class Microbiota2Recon(object):
         print('\t... done!\n')
         return inputs, outputs
 
-    def modify_recon(self, Recon_org, inputs, outputs, weight=0.5):
-        # ratio: how much "important" is microbiota, i.e., how much they "consume" in relation to RECON
-        assert (weight > 0.1) and (weight < 1.), "scaling must be between 0. and 1.!"
+    def modify_recon(self, Recon_org, inputs, outputs, alpha=0.5):
+        # alpha: how much microbiota is weighted in relation to RECON
+        assert (alpha > 0.) and (alpha < 1.), "Weight must be between 0. and 1.!"
 
         Recon = Recon_org.copy()
 
@@ -148,19 +148,17 @@ class Microbiota2Recon(object):
         # scale all lower bounds of the EXTERNAL reactions
         for r in Recon.reactions:
             if 'EX_' in r.id:
-                r.lower_bound = weight * r.lower_bound
+                r.lower_bound = alpha * r.lower_bound
 
         # go over inputs and modify lower bounds
         for ki in inputs:
             if 'EX_' + ki in self.names:
-                Recon.reactions.get_by_id('EX_' + ki).lower_bound = Recon.reactions.get_by_id('EX_' + ki).lower_bound + (
-                        1. - weight) * inputs[ki]
+                Recon.reactions.get_by_id('EX_' + ki).lower_bound = Recon.reactions.get_by_id('EX_' + ki).lower_bound + (1. - alpha) * inputs[ki]
 
         # go over outputs
         for ko in outputs:
             if 'EX_' + ko in self.names:
-                Recon.reactions.get_by_id('EX_' + ko).lower_bound = Recon.reactions.get_by_id('EX_' + ko).lower_bound - (
-                        1. - weight) * outputs[ko]
+                Recon.reactions.get_by_id('EX_' + ko).lower_bound = Recon.reactions.get_by_id('EX_' + ko).lower_bound - (1. - alpha) * outputs[ko]
 
         print('\t... done!\n')
         return Recon
@@ -170,7 +168,7 @@ class Microbiota2Recon(object):
 
         ins_n, outs_n = self.normalize_ins_outs(ins, outs)
 
-        Recon = self.modify_recon(self.R, ins_n, outs_n, weight=self.weight)
+        Recon = self.modify_recon(self.R, ins_n, outs_n, alpha=self.alpha)
 
         if self.new_recon_name[-3:] == 'mat':
             cobra.io.save_matlab_model(Recon, os.path.join(self.recon_dir, self.new_recon_name))
