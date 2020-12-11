@@ -3,12 +3,13 @@ Microbiota-to-Recon (M2R) program allows to modify your model (a human genome-sc
 
 ## Dependencies
 * `python2` or `python3`
-* `cobrapy` [Link](https://cobrapy.readthedocs.io/)
+* `cobrapy 0.18.1` [Link](https://cobrapy.readthedocs.io/)
 * `os`
 * `pickle`
 
 ## Requirements
 The program assumes the following:
+* All necessary packages are installed (see dependencies).
 * Microbiota collection is downloaded (e.g., see [Link](https://www.vmh.life/#downloadview)).
 * A model (e.g., RECON3D, see [Link](https://www.vmh.life/#downloadview)) is prepared.
 
