@@ -18,7 +18,7 @@ class Microbiota2Recon(object):
 
         print('------------------\n')
 
-        self.folder = input('Please provide a folder name where the microbiota files (.mat) are (default: microbiota): ') or 'microbiota'
+        self.folder = input('Please provide a folder name where the microbiota files (.mat or .pickle) are (default: microbiota, type 0 if you want to skip loading microbiota): ') or 'microbiota'
         print('\t -> {}'.format(self.folder))
 
         self.files = [item for item in input('Please provide a list of names of microbiota that are supposed to influence the model separated by a space (e.g., Ruminococcus_sp_5_1_39BFAA.mat Acinetobacter_baumannii_AB0057.mat, default: load all files from the folder): ').split()]
@@ -124,16 +124,16 @@ class Microbiota2Recon(object):
 
         return inputs, outputs
 
-    def normalize_ins_outs(self, inputs, outputs, fin_value=1000.):
+    def normalize_ins_outs(self, inputs, outputs):
         print('Step 2/3:  Normalize metabolites...')
         max_val = max(max(list(inputs.values())), max(list(outputs.values())))
         # inputs
         for ki in inputs:
-            inputs[ki] = fin_value * float(inputs[ki] / max_val)
+            inputs[ki] = self.fin_value * float(inputs[ki] / max_val)
 
         # outputs
         for ko in outputs:
-            outputs[ko] = fin_value * float(outputs[ko] / max_val)
+            outputs[ko] = self.fin_value * float(outputs[ko] / max_val)
 
         print('\t... done!\n')
         return inputs, outputs
@@ -147,26 +147,37 @@ class Microbiota2Recon(object):
         print('Step 3/3:  Modify the model...')
         # scale all lower bounds of the EXTERNAL reactions
         for r in Recon.reactions:
-            if 'EX_' in r.id:
-                r.lower_bound = alpha * r.lower_bound
+            r.lower_bound = alpha * r.lower_bound
+            r.upper_bound = alpha * r.upper_bound
 
         # go over inputs and modify lower bounds
         for ki in inputs:
-            if 'EX_' + ki in self.names:
-                Recon.reactions.get_by_id('EX_' + ki).lower_bound = Recon.reactions.get_by_id('EX_' + ki).lower_bound + (1. - alpha) * inputs[ki]
+            if ki in self.names:
+                try:
+                    Recon.reactions.get_by_id('EX_' + ki).lower_bound = Recon.reactions.get_by_id('EX_' + ki).lower_bound + (1. - alpha) * inputs[ki]
+                except:
+                    continue
 
         # go over outputs
         for ko in outputs:
-            if 'EX_' + ko in self.names:
-                Recon.reactions.get_by_id('EX_' + ko).lower_bound = Recon.reactions.get_by_id('EX_' + ko).lower_bound - (1. - alpha) * outputs[ko]
+            if ko in self.names:
+                try:
+                    Recon.reactions.get_by_id('EX_' + ko).lower_bound = Recon.reactions.get_by_id('EX_' + ko).lower_bound - (1. - alpha) * outputs[ko]
+                except:
+                    continue
 
         print('\t... done!\n')
         return Recon
 
     def procedure(self):
-        ins, outs = self.calculate_ins_outs(self.files, self.folder)
 
-        ins_n, outs_n = self.normalize_ins_outs(ins, outs)
+        if self.folder == '0':
+            ins_n = []
+            outs_n = []
+            print('Steps 1 and 2: skipped!')
+        else:
+            ins, outs = self.calculate_ins_outs(self.files, self.folder)
+            ins_n, outs_n = self.normalize_ins_outs(ins, outs)
 
         Recon = self.modify_recon(self.R, ins_n, outs_n, alpha=self.alpha)
 
